@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"go_project/db"
+	"go_project/push"
 	"go_project/user"
 	"log"
 	"net/http"
@@ -30,11 +31,18 @@ func main() {
 
 	engine := gin.Default()
 
+	engine.LoadHTMLGlob("templates/*")
+
+	engine.Static("/static", "./static")
+
 	engine.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
 	userGroup := engine.Group("user")
+
+	// 服务器推送
+	userGroup.GET("/push", push.PushStatic)
 
 	userGroup.GET("/queryUser", user.QueryUser)
 
