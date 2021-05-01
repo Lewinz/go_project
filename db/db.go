@@ -1,9 +1,15 @@
 package db
 
-import "database/sql"
+import (
+	"database/sql"
 
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+)
+
+// DbConnect datasouce connect
 var DbConnect *sql.DB
 
+// DbInit init datasouce config
 func DbInit() (err error) {
 	dsn := "root:123456@tcp(47.117.136.250:3306)/go?charset=utf8mb4&parseTime=True"
 

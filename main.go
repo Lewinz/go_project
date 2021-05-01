@@ -1,13 +1,17 @@
 package main
 
 import (
+	"context"
 	"fmt"
+	"go_project/db"
+	"go_project/user"
+	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lewin/project/db"
-	"github.com/lewin/project/user"
 )
 
 // InitConfig is init some config
@@ -24,7 +28,7 @@ func InitConfig() {
 func main() {
 	InitConfig()
 
-	engine := gin.New()
+	engine := gin.Default()
 
 	engine.NoRoute(func(c *gin.Context) {
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
@@ -34,9 +38,9 @@ func main() {
 
 	userGroup.GET("/queryUser", user.QueryUser)
 
-	userGroup.PUT("/updateUser", user.UpdateUser)
-
 	userGroup.POST("/insertUser", user.InsertUser)
+
+	userGroup.PUT("/updateUser", user.UpdateUser)
 
 	userGroup.DELETE("/deleteUser", user.DeleteUser)
 
@@ -45,9 +49,21 @@ func main() {
 		Handler: engine,
 	}
 
-	gin.SetMode(gin.ReleaseMode)
-	if err := srv.ListenAndServe(); err != nil {
-		fmt.Printf("Failed to listen and serve %v", err)
-		os.Exit(1)
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen : %s\n", err)
+		}
+	}()
+
+	quit := make(chan os.Signal)
+	signal.Notify(quit, os.Interrupt)
+	<-quit
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		log.Fatal("Server Shutdown:", err)
 	}
+	log.Println("Server exiting")
 }

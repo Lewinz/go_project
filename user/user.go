@@ -1,11 +1,10 @@
 package user
 
-import "time"
-
+// User system person
 type User struct {
-	UserId     int       `json:"-"` // 主键
-	Name       string    `json:"-"` // 姓名
-	Age        int       `json:"-"` // 年龄
-	Adress     string    `json:"-"` // 地址
-	CreateDate time.Time `json:"-"` // 创建时间
+	UserID     int64  `json:"userID"`     // 主键
+	Name       string `json:"name"`       // 姓名
+	Age        int64  `json:"age"`        // 年龄
+	Adress     string `json:"adress"`     // 地址
+	CreateDate string `json:"createDate"` // 创建时间
 }

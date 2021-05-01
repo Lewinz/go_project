@@ -1,25 +1,27 @@
 package user
 
 import (
+	"fmt"
+	"go_project/db"
+	"go_project/util"
 	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
-	"github.com/lewin/project/db"
-	"github.com/lewin/project/util"
 )
 
+// QueryUser query user
 func QueryUser(c *gin.Context) {
-	userId, err := strconv.Atoi(c.Query("userId"))
+	userID, err := strconv.Atoi(c.Query("userId"))
 
 	if err != nil {
 		util.Failed(c, "strconv.Atoi", err)
 		return
 	}
 
-	querySql := "select * from use_table where user_id = ?"
+	querySQL := "select * from use_table where user_id = ?"
 
-	smrt, err := db.DbConnect.Prepare(querySql)
+	smrt, err := db.DbConnect.Prepare(querySQL)
 
 	var user User
 
@@ -29,7 +31,7 @@ func QueryUser(c *gin.Context) {
 	}
 	defer smrt.Close()
 
-	err = smrt.QueryRow(userId).Scan(&user.UserId, &user.Name, &user.Age, &user.Adress, &user.CreateDate)
+	err = smrt.QueryRow(userID).Scan(&user.UserID, &user.Name, &user.Age, &user.Adress, &user.CreateDate)
 
 	if err != nil {
 		util.Failed(c, "QueryRow", err)
@@ -39,19 +41,20 @@ func QueryUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// InsertUser is insert user table
 func InsertUser(c *gin.Context) {
-	var user User
+	var user User = User{}
 
-	err := c.BindJSON(user)
-
-	if err != nil {
+	if err := c.BindJSON(&user); err != nil {
 		util.Failed(c, "build struct err", err)
 		return
 	}
 
-	insertSql := "insert into use_table (user_id,name,age,adress,create_time) values (?,?,?,?,?)"
+	fmt.Printf("user:-- %v", user)
 
-	smrt, err := db.DbConnect.Prepare(insertSql)
+	insertSQL := "insert into use_table (name,age,adress,create_time) values (?,?,?,?)"
+
+	smrt, err := db.DbConnect.Prepare(insertSQL)
 
 	if err != nil {
 		util.Failed(c, "Prepare", err)
@@ -60,7 +63,7 @@ func InsertUser(c *gin.Context) {
 
 	defer smrt.Close()
 
-	sqlResult, err := smrt.Exec(user.UserId, user.Name, user.Age, user.Adress, user.CreateDate)
+	sqlResult, err := smrt.Exec(user.Name, user.Age, user.Adress, user.CreateDate)
 
 	if err != nil {
 		util.Failed(c, "smrt.Exec", err)
@@ -77,26 +80,27 @@ func InsertUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": theID})
 }
 
+// UpdateUser is modify user table
 func UpdateUser(c *gin.Context) {
 	var user User
 
-	err := c.BindJSON(user)
+	err := c.BindJSON(&user)
 
 	if err != nil {
 		util.Failed(c, "build struct err", err)
 		return
 	}
 
-	updateSql := "update use_table set name = ?,age = ?,adress = ?,create_time = ? where user_id = ?"
+	updateSQL := "update use_table set name = ?,age = ?,adress = ?,create_time = ? where user_id = ?"
 
-	smrt, err := db.DbConnect.Prepare(updateSql)
+	smrt, err := db.DbConnect.Prepare(updateSQL)
 
 	if err != nil {
 		util.Failed(c, "Prepare", err)
 		return
 	}
 
-	sqlResult, err := smrt.Exec(user.Name, user.Age, user.Adress, user.CreateDate, user.UserId)
+	sqlResult, err := smrt.Exec(user.Name, user.Age, user.Adress, user.CreateDate, user.UserID)
 
 	if err != nil {
 		util.Failed(c, "smrt.Exec", err)
@@ -113,24 +117,25 @@ func UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"result": n})
 }
 
+// DeleteUser is remove user table
 func DeleteUser(c *gin.Context) {
-	userId, err := strconv.Atoi(c.Query("userId"))
+	userID, err := strconv.Atoi(c.Query("userId"))
 
 	if err != nil {
 		util.Failed(c, "strconv.Atoi", err)
 		return
 	}
 
-	deleteSql := "delete from use_table where user_id = ?"
+	deleteSQL := "delete from use_table where user_id = ?"
 
-	smrt, err := db.DbConnect.Prepare(deleteSql)
+	smrt, err := db.DbConnect.Prepare(deleteSQL)
 
 	if err != nil {
 		util.Failed(c, "Prepare", err)
 		return
 	}
 
-	sqlResult, err := smrt.Exec(userId)
+	sqlResult, err := smrt.Exec(userID)
 
 	if err != nil {
 		util.Failed(c, "Exec", err)
