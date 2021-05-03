@@ -1,4 +1,4 @@
-package user
+package policy
 
 import (
 	"testing"
@@ -6,7 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func TestInsertUser(t *testing.T) {
+func TestQueryPolicy(t *testing.T) {
 	type args struct {
 		c *gin.Context
 	}
@@ -18,7 +18,7 @@ func TestInsertUser(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			InsertUser(tt.args.c)
+			QueryPolicy(tt.args.c)
 		})
 	}
 }

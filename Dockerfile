@@ -13,16 +13,16 @@ WORKDIR /build
 COPY . .
 
 # 将我们的代码编译成二进制可执行文件app
-RUN go build -o app .
+RUN go build -o go_project .
 
 # 移动到用于存放生成的二进制文件的 /dist 目录
 WORKDIR /dist
 
 # 将二进制文件从 /build 目录复制到这里
-RUN cp /build/app .
+RUN cp /build/go_project .
 
 # 声明服务端口
 EXPOSE 8888
 
 # 启动容器时运行的命令
-CMD ["/dist/app"]
+CMD ["/dist/go_project"]

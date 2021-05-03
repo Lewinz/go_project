@@ -4,8 +4,9 @@ import (
 	"context"
 	"fmt"
 	"go_project/db"
+	"go_project/filter"
+	"go_project/policy"
 	"go_project/push"
-	"go_project/user"
 	"log"
 	"net/http"
 	"os"
@@ -58,18 +59,25 @@ func main() {
 		c.JSON(404, gin.H{"code": "PAGE_NOT_FOUND", "message": "Page not found"})
 	})
 
-	userGroup := engine.Group("user")
+	// 获取token
+	engine.GET("/createToken", filter.CreateToken)
 
 	// 服务器推送
-	userGroup.GET("/push", push.PushStatic)
+	engine.GET("/push", push.PushStatic)
 
-	userGroup.GET("/queryUser", user.QueryUser)
+	// token认证
+	userGroup := engine.Group("policy", filter.AuthCheck)
+	{
+		userGroup.POST("/queryPolicy", policy.QueryPolicy)
+	}
 
-	userGroup.POST("/insertUser", user.InsertUser)
+	// userGroup.GET("/queryUser", user.QueryUser)
 
-	userGroup.PUT("/updateUser", user.UpdateUser)
+	// userGroup.POST("/insertUser", user.InsertUser)
 
-	userGroup.DELETE("/deleteUser", user.DeleteUser)
+	// userGroup.PUT("/updateUser", user.UpdateUser)
+
+	// userGroup.DELETE("/deleteUser", user.DeleteUser)
 
 	srv := &http.Server{
 		Addr:    ":8081",
