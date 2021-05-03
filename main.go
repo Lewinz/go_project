@@ -26,10 +26,29 @@ func InitConfig() {
 	}
 }
 
+// // MyLogger is Custom logger()
+// func MyLogger() gin.HandlerFunc {
+// 	return func(c *gin.Context) {
+// 		loggerFile, _ := os.Create("run.log")
+// 		gin.DefaultWriter = io.MultiWriter(loggerFile)
+
+// 		c.Next()
+
+// 		status := c.Writer.Status()
+
+// 		fmt.Fprintf(io.MultiWriter(loggerFile), "[GIN] %v | %v",
+// 			c.Request.URL.Path,
+// 			status)
+// 	}
+// }
+
 func main() {
 	InitConfig()
+	//engine := gin.Default()
 
 	engine := gin.Default()
+
+	//engine.Use(MyLogger(), gin.Recovery())
 
 	engine.LoadHTMLGlob("templates/*")
 
