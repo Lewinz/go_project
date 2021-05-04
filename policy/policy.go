@@ -1,7 +1,7 @@
 package policy
 
 import (
-	"go_project/db"
+	"go_project/components/db"
 	"go_project/util"
 	"net/http"
 

@@ -1,7 +1,7 @@
 package filter
 
 import (
-	"go_project/db"
+	"go_project/components/db"
 	"go_project/user"
 	"go_project/util"
 	"log"

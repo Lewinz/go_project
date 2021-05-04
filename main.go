@@ -3,7 +3,8 @@ package main
 import (
 	"context"
 	"fmt"
-	"go_project/db"
+	"go_project/components/config"
+	"go_project/components/db"
 	"go_project/filter"
 	"go_project/policy"
 	"go_project/push"
@@ -13,13 +14,17 @@ import (
 	"os/signal"
 	"time"
 
+	_ "github.com/jinzhu/gorm/dialects/mysql"
+
 	"github.com/gin-gonic/gin"
 )
 
 // InitConfig is init some config
 func InitConfig() {
+	// 以当前文件为基准计算配置文件位置
+	config.InitViperConfig(".")
 	// 初始化mysql配置
-	err := db.DbInit()
+	err := db.Instance()
 
 	if err != nil {
 		fmt.Printf("init db faild %v \n", err)

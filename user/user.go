@@ -2,7 +2,7 @@ package user
 
 import (
 	"fmt"
-	"go_project/db"
+	"go_project/components/db"
 )
 
 // User system person
