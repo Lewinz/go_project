@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"go_project/components/config"
 	"go_project/components/db"
+	"go_project/components/logger"
 	"go_project/filter"
 	"go_project/policy"
 	"go_project/push"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
 
 	_ "github.com/jinzhu/gorm/dialects/mysql"
+	"github.com/spf13/viper"
+	"go.uber.org/zap"
 
 	"github.com/gin-gonic/gin"
 )
@@ -23,6 +25,8 @@ import (
 func InitConfig() {
 	// 以当前文件为基准计算配置文件位置
 	config.InitViperConfig(".")
+	// 初始化日志
+	logger.InitLoggerConfig()
 	// 初始化mysql配置
 	err := db.Instance()
 
@@ -30,31 +34,16 @@ func InitConfig() {
 		fmt.Printf("init db faild %v \n", err)
 		return
 	}
+
 }
-
-// // MyLogger is Custom logger()
-// func MyLogger() gin.HandlerFunc {
-// 	return func(c *gin.Context) {
-// 		loggerFile, _ := os.Create("run.log")
-// 		gin.DefaultWriter = io.MultiWriter(loggerFile)
-
-// 		c.Next()
-
-// 		status := c.Writer.Status()
-
-// 		fmt.Fprintf(io.MultiWriter(loggerFile), "[GIN] %v | %v",
-// 			c.Request.URL.Path,
-// 			status)
-// 	}
-// }
 
 func main() {
 	InitConfig()
 	//engine := gin.Default()
 
-	engine := gin.Default()
+	engine := gin.New()
 
-	//engine.Use(MyLogger(), gin.Recovery())
+	engine.Use(logger.GinLogger(), logger.GinRecovery(true))
 
 	engine.LoadHTMLGlob("templates/*")
 
@@ -76,23 +65,19 @@ func main() {
 		userGroup.POST("/queryPolicy", policy.QueryPolicy)
 	}
 
-	// userGroup.GET("/queryUser", user.QueryUser)
-
-	// userGroup.POST("/insertUser", user.InsertUser)
-
-	// userGroup.PUT("/updateUser", user.UpdateUser)
-
-	// userGroup.DELETE("/deleteUser", user.DeleteUser)
+	port := viper.GetString("server.port")
 
 	srv := &http.Server{
-		Addr:    ":8081",
+		Addr:    ":" + port,
 		Handler: engine,
 	}
 
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
-			log.Fatalf("listen : %s\n", err)
+			logger.Debug("Server listen:", zap.Error(err))
+			return
 		}
+		logger.Debug("server listen port:", zap.String("port", port))
 	}()
 
 	quit := make(chan os.Signal)
@@ -103,7 +88,7 @@ func main() {
 	defer cancel()
 
 	if err := srv.Shutdown(ctx); err != nil {
-		log.Fatal("Server Shutdown:", err)
+		logger.Debug("Server Shutdown:", zap.Error(err))
 	}
-	log.Println("Server exiting")
+	logger.Debug("Server exiting")
 }

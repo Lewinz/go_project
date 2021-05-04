@@ -7,4 +7,10 @@ database:
   password: 123456
   charset: utf8mb4
 server:
-  port: 8080
+  port: 8081
+logger:
+  level: debug
+  filename: run.log
+  maxsize: 200
+  max_age: 7
+  max_backups: 10
