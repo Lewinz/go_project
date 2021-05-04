@@ -1,7 +1,7 @@
 package filter
 
 import (
-	"go_project/components/db"
+	"fmt"
 	"go_project/user"
 	"go_project/util"
 	"log"
@@ -61,31 +61,15 @@ func AuthCheck(c *gin.Context) {
 
 // CreateToken create jwt token by username password
 func CreateToken(c *gin.Context) {
-	var user user.User
+	var u user.User
 
-	c.ShouldBind(&user)
+	c.ShouldBind(&u)
 
-	checkSQL := "select * from user where user_name=? and password =?"
+	valid := user.ValidUser(u.UserName, u.Password)
 
-	smrt, err := db.DbConnect.Prepare(checkSQL)
-
-	if err != nil {
-		util.Failed(c, "Prepare", err)
-		return
-	}
-
-	defer smrt.Close()
-
-	rows, err := smrt.Query(user.UserName, user.Password)
-
-	if err != nil {
-		util.Failed(c, "query", err)
-		return
-	}
-
-	if rows.Next() {
+	if valid {
 		claims := MyClaims{
-			user.UserName,
+			u.UserName,
 			jwt.StandardClaims{
 				ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(),
 				Issuer:    "go_project",
@@ -102,5 +86,7 @@ func CreateToken(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{
 			"token": result,
 		})
+	} else {
+		util.Failed(c, "create token err :", fmt.Errorf("please param username and passrowd"))
 	}
 }

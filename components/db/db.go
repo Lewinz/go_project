@@ -1,15 +1,15 @@
 package db
 
 import (
-	"database/sql"
 	"fmt"
 
+	"github.com/jinzhu/gorm"
 	_ "github.com/jinzhu/gorm/dialects/mysql"
 	"github.com/spf13/viper"
 )
 
 // DbConnect datasouce connect
-var DbConnect *sql.DB
+var DbConnect *gorm.DB
 
 // dbConfig is database connect param
 type dbConfig struct {
@@ -25,21 +25,15 @@ type dbConfig struct {
 func Instance() (err error) {
 	dsn := getDBConfig()
 
-	fmt.Println("dsn adress:" + dsn)
-	DbConnect, err = sql.Open(getDBDriver(), dsn)
+	fmt.Println("DB dsn adress:" + dsn)
+
+	DbConnect, err = gorm.Open(getDBDriver(), dsn)
 
 	if err != nil {
 		fmt.Printf("sql.Open func append faild:%v", err)
 		return err
 	}
-
-	// 尝试连接数据库，效验dsn是否正确
-	err = DbConnect.Ping()
-	if err != nil {
-		fmt.Printf("sql.Ping func append faild:%v", err)
-		return err
-	}
-
+	DbConnect.SingularTable(true)
 	return nil
 }
 
