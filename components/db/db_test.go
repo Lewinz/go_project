@@ -23,7 +23,7 @@ func TestDbInit(t *testing.T) {
 }
 
 func Test_getDBConfig(t *testing.T) {
-	config.InitViperConfig("../../")
+	config.InitTestConfig()
 	dbStr := getDBConfig()
 	fmt.Println("dbStr--", dbStr)
 

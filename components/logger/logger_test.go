@@ -6,7 +6,7 @@ import (
 )
 
 func TestInitLoggerConfig(t *testing.T) {
-	config.InitViperConfig("../../")
+	config.InitTestConfig()
 	InitLoggerConfig()
 
 	Debug("hahahahahahah")

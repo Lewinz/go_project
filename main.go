@@ -2,11 +2,12 @@ package main
 
 import (
 	"context"
+	"flag"
 	"fmt"
-	"go_project/components/config"
 	"go_project/components/db"
 	"go_project/components/logger"
 	"go_project/filter"
+	"go_project/models"
 	"go_project/policy"
 	"go_project/push"
 	"net/http"
@@ -23,12 +24,31 @@ import (
 
 // InitConfig is init some config
 func InitConfig() {
-	// 以当前文件为基准计算配置文件位置
-	config.InitViperConfig(".")
+	// -------------------------------------------------------
+	// 初始化配置文件，从命令行中服务参数
+	viper.SetConfigType("yaml")
+
+	var configPath string
+	flag.StringVar(&configPath, "f", "", "配置文件路径'-f /mnt/config'")
+	flag.Parse()
+
+	file, err := os.Open(configPath)
+	if err != nil {
+		return
+	}
+	defer file.Close()
+
+	viper.ReadConfig(file)
+
+	port := viper.GetString("server.port")
+	fmt.Println("test server port:", port)
+
+	// -------------------------------------------------------
+
 	// 初始化日志
 	logger.InitLoggerConfig()
 	// 初始化mysql配置
-	err := db.Instance()
+	err = db.Instance()
 
 	if err != nil {
 		fmt.Printf("init db faild %v \n", err)
@@ -42,6 +62,9 @@ func main() {
 	//engine := gin.Default()
 
 	engine := gin.New()
+
+	// auto migrate
+	models.AutoMigrate()
 
 	engine.Use(logger.GinLogger(), logger.GinRecovery(true))
 

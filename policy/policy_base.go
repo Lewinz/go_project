@@ -4,55 +4,38 @@ import (
 	"fmt"
 	"go_project/components/db"
 	"go_project/components/logger"
+	"go_project/models"
 	"go_project/util"
 	"net/http"
 	"strconv"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
 )
 
-// PolicyBase policy base
-type PolicyBase struct {
-	ID         int    `json:"id"`
-	PolicyNo   string `json:"policyNo"`
-	InsureName string `json:"insureName"`
-
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
-}
-
-func (policy PolicyBase) isEmpty() bool {
-	if policy.PolicyNo == "" {
-		return true
-	}
-	return false
-}
-
 // QueryPolicy select policy info
 func QueryPolicy(c *gin.Context) {
 	policyNo, _ := c.GetQuery("policyNo")
 
-	var policyList []PolicyBase
+	var baseList []models.PolicyBase
 
-	db.DbConnect.Model(&PolicyBase{}).Where("policy_no = ?", policyNo).Find(&policyList)
+	db.DbConnect.Model(&models.PolicyBase{}).Where("policy_no = ?", policyNo).Find(&baseList)
 
 	c.JSON(http.StatusOK, gin.H{
-		"result": policyList,
+		"result": baseList,
 	})
 }
 
 // CreatePolicy create
 func CreatePolicy(c *gin.Context) {
-	var policyBase PolicyBase
+	var base models.PolicyBase
 
-	c.ShouldBind(&policyBase)
+	c.ShouldBind(&base)
 
-	result := db.DbConnect.Create(&policyBase)
+	result := db.DbConnect.Create(&base)
 	if result.RowsAffected > 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"result": policyBase.ID,
+			"result": base.ID,
 		})
 	} else {
 		logger.Debug("insert policyBase err:", zap.String("err", fmt.Sprintln(result.Error)))
@@ -62,11 +45,11 @@ func CreatePolicy(c *gin.Context) {
 
 // UpdatePolicy update
 func UpdatePolicy(c *gin.Context) {
-	var policyBase PolicyBase
+	var base models.PolicyBase
 
-	c.ShouldBind(&policyBase)
+	c.ShouldBind(&base)
 
-	result := db.DbConnect.Model(PolicyBase{}).Where("policy_no = ?", policyBase.PolicyNo).Updates(policyBase)
+	result := db.DbConnect.Model(models.PolicyBase{}).Where("policy_no = ?", base.PolicyNo).Updates(base)
 
 	if result.RowsAffected > 0 {
 		c.JSON(http.StatusOK, gin.H{
@@ -80,15 +63,15 @@ func UpdatePolicy(c *gin.Context) {
 
 // DeletePolicy delete
 func DeletePolicy(c *gin.Context) {
-	var policyBase PolicyBase
+	var base models.PolicyBase
 
-	c.ShouldBind(&policyBase)
+	c.ShouldBind(&base)
 
-	result := db.DbConnect.Delete(&PolicyBase{ID: policyBase.ID})
+	result := db.DbConnect.Delete(models.PolicyBase{ID: base.ID})
 
 	if result.RowsAffected > 0 {
 		c.JSON(http.StatusOK, gin.H{
-			"result": "removed no:" + strconv.Itoa(policyBase.ID),
+			"result": "removed no:" + strconv.Itoa(base.ID),
 		})
 	} else {
 		logger.Debug("removed policyBase err:", zap.String("err", fmt.Sprintln(result.Error)))

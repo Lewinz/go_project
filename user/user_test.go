@@ -7,7 +7,7 @@ import (
 )
 
 func TestValidUser(t *testing.T) {
-	config.InitViperConfig("../")
+	config.InitTestConfig()
 	db.Instance()
 	db.DbConnect.LogMode(true)
 	type args struct {

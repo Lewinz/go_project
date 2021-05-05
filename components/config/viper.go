@@ -6,11 +6,11 @@ import (
 	"github.com/spf13/viper"
 )
 
-// InitViperConfig load yml config and read it.
-func InitViperConfig(configPath string) {
+// InitTestConfig load yml config and read it.
+func InitTestConfig() {
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("config")
-	viper.AddConfigPath(configPath)
+	viper.AddConfigPath("../../")
 	err := viper.ReadInConfig()
 	if err != nil {
 		fmt.Println("viper load config faild", err)
