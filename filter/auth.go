@@ -29,8 +29,6 @@ var MySecret = []byte("zxl")
 func AuthCheck(c *gin.Context) {
 	tokenStr, err := c.Cookie("go_project")
 
-	log.Println("tokenStr-", tokenStr)
-
 	if err != nil || len(tokenStr) == 0 {
 		log.Println("token-", c.GetHeader("Authorization"))
 		tokenStr = strings.TrimPrefix(c.GetHeader("Authorization"), "Bearer ")
@@ -44,8 +42,6 @@ func AuthCheck(c *gin.Context) {
 	token, err := jwt.ParseWithClaims(tokenStr, &MyClaims{}, func(token *jwt.Token) (i interface{}, err error) {
 		return MySecret, nil
 	})
-
-	log.Println("token ParseWithClaims-", token)
 
 	if err != nil {
 		c.AbortWithStatus(http.StatusUnauthorized)

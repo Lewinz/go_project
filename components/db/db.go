@@ -34,6 +34,8 @@ func Instance() (err error) {
 		return err
 	}
 	DbConnect.SingularTable(true)
+
+	DbConnect.LogMode(true)
 	return nil
 }
 

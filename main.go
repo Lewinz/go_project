@@ -62,7 +62,13 @@ func main() {
 	// token认证
 	userGroup := engine.Group("policy", filter.AuthCheck)
 	{
-		userGroup.POST("/queryPolicy", policy.QueryPolicy)
+		userGroup.GET("/queryPolicy", policy.QueryPolicy)
+
+		userGroup.POST("/createPolicy", policy.CreatePolicy)
+
+		userGroup.PUT("/updatePolicy", policy.UpdatePolicy)
+
+		userGroup.DELETE("/deletePolicy", policy.DeletePolicy)
 	}
 
 	port := viper.GetString("server.port")
